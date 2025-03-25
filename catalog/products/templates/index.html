@@ -1,5 +1,45 @@
 {% extends 'base.html' %}
+{% load math_filters %}
 {% block content %}
-    <h1>Каталог товарів</h1>
-    <p>Скоро будуть</p>
+    <h1>
+        Каталог товарів
+    </h1>
+    <div class="row-cols-1 row-cols-md-3">
+
+        {% for product in products %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <img src="{{product.image_path|default:'https://assets.turbologo.com/blog/en/2021/09/10094210/product-photo-1.png'}}"
+                         alt="{{product.name}} " class="card-img-top">
+                    <div class="card-body">
+                        <h5 class="card-title">{{product.name}</h5>
+                        {% if not product.available %}
+                            <span class="text-secondary">Not available</span>
+                        {% endif %}
+                    <div class="product-rating">
+                        {% for i in "12345" %}
+                            {% if forloop.counter < products.rating %}
+                                <i class="bi bi-star-fill text-warning"></i>
+                            {% else %}
+                                <i class="bi bi-star text-muted"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                        {% if product.discount %}
+                            <span class="text-success">
+                                {{ product.price|calculate_discount:product.discount }}
+                            </span>
+                            <span class="text-muted text-decoration-line-through">
+                                {{product.price }}
+                            </span>
+                        {% else %}
+                            <span class="text-success">
+                                {{ product.price }}
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}
