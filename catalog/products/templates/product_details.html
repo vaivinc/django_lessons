@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-3">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="{{product.image_path|default:'https://assets.turbologo.com/blog/en/2021/09/10094210/product-photo-1.png'}}">
+        </div>
+        <div class="col-md-6 mt-5">
+            <h5>{{ product.name }}</h5>
+            <p>{{ product.description }}</p>
+
+        <div class="product-rating">
+            {% for i in "12345" %}
+                {% if forloop.counter < products.rating %}
+                    <i class="bi bi-star-fill text-warning"></i>
+                {% else %}
+                    <i class="bi bi-star text-muted"></i>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+            {% if product.discount %}
+                <span class="text-success">
+                    {{ product.price|calculate_discount:product.discount }}
+                </span>
+                <span class="text-muted text-decoration-line-through">
+                    {{product.price }}
+                </span>
+            {% else %}
+                <span class="text-success">
+                    {{ product.price }}
+                </span>
+            {% endif %}
+            <h5>Nomenclature:{{product.nomenclature}}</h5>
+
+            {% if not product.available %}
+                <span class="text-secondary">Not available</span>
+            {% else %}
+                <span class="text-secondary">Available</span>
+            {% endif %}
+            <a class="btn btn-primary" href="{% url 'product_details' product.id %}">More</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            {% if product.description %}
+                <p>{{product.description}}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

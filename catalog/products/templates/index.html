@@ -1,21 +1,23 @@
 {% extends 'base.html' %}
 {% load math_filters %}
 {% block content %}
-    <h1>
-        Каталог товарів
-    </h1>
-    <div class="row-cols-1 row-cols-md-3">
 
-        {% for product in products %}
-            <div class="col">
-                <div class="card h-100 shadow-sm">
-                    <img src="{{product.image_path|default:'https://assets.turbologo.com/blog/en/2021/09/10094210/product-photo-1.png'}}"
-                         alt="{{product.name}} " class="card-img-top">
+<div class='container'>
+    <h1>Каталог Товарів</h1>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+
+            {% for product in products %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <img src="{{product.image_path|default:'https://assets.turbologo.com/blog/en/2021/09/10094210/product-photo-1.png'}}"
+                             alt="{{product.name}} " class="card-img-top">
+
                     <div class="card-body">
                         <h5 class="card-title">{{product.name}</h5>
                         {% if not product.available %}
                             <span class="text-secondary">Not available</span>
                         {% endif %}
+
                     <div class="product-rating">
                         {% for i in "12345" %}
                             {% if forloop.counter < products.rating %}
@@ -24,6 +26,7 @@
                                 <i class="bi bi-star text-muted"></i>
                             {% endif %}
                         {% endfor %}
+
                     </div>
                         {% if product.discount %}
                             <span class="text-success">
@@ -38,8 +41,13 @@
                             </span>
                         {% endif %}
                     </div>
+
+                    {% if not product.available %}
+                       <span class="text-muted">Not available</span>
+                    {% endif %}
                 </div>
             </div>
-        {% endfor %}
+        </div>
+    {% endfor %}
     </div>
 {% endblock %}

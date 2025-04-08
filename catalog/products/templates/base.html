@@ -9,20 +9,81 @@
 </head>
 <body class="d-flex flex-column vh-100">
     <header>
-        <nav class="navbar navbar-dark bg-dark">
-            <div class="container">
-                <a href="{% url 'index' %} class=navbar-brand">Home</a>
-            </div>
-        </nav>
+        <nav class="navbar navbar-dark bg-dark fixed-top navbar-expand-lg">
+            <div class="container d-flex flex-column">
+                <div class="navbar-nav w-100 text-light">
+                    <h4><a href="{% url 'shop:index' %}" class="navbar-brand text-light">Home</a></h4>
+                </div>
+                    <div class="nav-item text-light">
+                        <form
+                            action="{% url 'shop:index' %}"
+                            method="GET"
+                            class="d-flex mx auto">
+
+                        <select name="category" class="form-select me-3" onchange="this.form.submit()">
+                                <option value="" {% if not request.GET.category %} selected {% endif %}>Category</option>
+                            {% for category in categories %}
+                                <option value="{{ category.name }}" {% if request.GET.category == category.name %} selected {% endif %}>{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <select name="filter" id="form-select me-3" onchange="this.form.submit()" value="{{ request.GET.filter|default:'' }}">
+                            <option value="price_increase">{% if not request.GET.filter == price_increase %}  selected {% endif %}>Price Increase</option>
+                            <option value="price_decrease">{% if not request.GET.filter == price_decrease %}  selected {% endif %}>Price Decrease</option>
+                            <option value="rating_increase">{% if not request.GET.filter == rating_increase %}  selected {% endif %}Rating Increase</option>
+                            <option value="rating_decrease">{% if not request.GET.filter == price_decrease %}  selected {% endif %}Rating Decrease</option>
+
+                        </select>
+                        <input type="search" class="form-control me-3"
+                               name="search" placeholder="Пошук товарів"
+                               onchange="this.form.submit()"
+                               value="{{ request.GET.search|default:'' }}"/>
+
+
+                        <label for="min_price">Minimum price:</label>
+                        <input
+                        type="number"
+                        name="min_price"
+                        class="w-25 form-control"
+                        min="0"
+                        onchange="this.form.submit()"
+                        value="{{ request.GET.min_price|default:'' }}"
+                        />
+
+                        <label for="max_price">Maximum price:</label>
+                        <input
+                        type="number"
+                        name="max_price"
+                        class="w-25 form-control"
+                        min="0"
+                        onchange="this.form.submit()"
+                        value="{{ request.GET.max_price }}">
+
+                        <label for="date">Start Date:</label>
+                        <input type="datetime-local" name="date" class="form-control" value="{{ request.GET.date|default:'' }}" onchange="this.form.submit()">
+
+                        <label for="end_date">End Date:</label>
+                        <input type="datetime-local" name="end_date" class="form-control" value="{{ request.GET.end_date|default:'' }}" onchange="this.form.submit()">
+
+
+                        </form>
+                    </div>
+                </div>
+            </nav>
     </header>
 
-    <main class="container mt-3 flet-shrink-0">
+
+    <main class="container mt-5 flex-shrink-0" style="margin-top:200px;">
         {% block content %}
+
         {% endblock %}
     </main>
 
-    <footer class="footer mt-auto py-3 px-2 bg-light">
-        <a href="{%url 'about' %} class=navbar-brand">About</a>
+    <footer class="footer mt-5 py-3 px-2 bg-dark fixed-bottom">
+        <a href="{% url 'shop:about' %}">About Us</a>
     </footer>
+
+
+
 </body>
 </html>
