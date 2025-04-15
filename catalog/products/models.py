@@ -35,4 +35,4 @@ class Product(models.Model):
         unique_together = ['name', 'nomenclature']
 
     def __str__(self):
-        return f"{self.name} ({self.nomenclature})"
+        return self.name, self.nomenclature

@@ -25,16 +25,15 @@ def index(request):
     if max_price:
         product = product.filter(price__lte=max_price)
 
-    if filter_name == "price_increase":
-        product = product.order_by("price")
-    elif filter_name == "price_decrease":
-        product = product.order_by("-price")
-    elif filter_name == "rating_increase":
-        product = product.order_by("rating")
-    elif filter_name == "rating_decrease":
-        product = product.order_by("-rating")
-    else:
-        ...
+    match filter_name:
+        case "price_increase":
+            products = product.order_by("price")
+        case "price_decrease":
+            products = product.order_by("-price")
+        case "rating_increase":
+            products = product.order_by("rating")
+        case "rating_decrease":
+            products = product.order_by("-rating")
 
     return render(request, "index.html", context={"product": product, "categories": categories})
 
@@ -43,6 +42,6 @@ def about(request):
     return render(request, "about.html")
 
 
-def product_details(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    return render(request, "product_details.html", context={"product": product})
+def products_details(request, product_id):
+    products = get_object_or_404(Product, id=product_id)
+    return render(request, "product_details.html", context={"product": products})

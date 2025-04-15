@@ -1,11 +1,11 @@
 from django.contrib import admin
 from django.urls import path
-from .views import index, about, product_details
+from .views import index, about, products_details
 
-app_name = "shop"
+app_name = "products"
 
 urlpatterns = [
     path('index/', index, name="index"),
     path('about/', about, name="about"),
-    path('product/<int:product_id>/', product_details, name="product_details")
+    path('products/<int:product_id>/', products_details, name="products_details")
 ]
