@@ -1,5 +1,6 @@
-from django.shortcuts import render, get_object_or_404
-from .models import Product, Category
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Product, Category, Cart, CartItem
+from django.conf import settings
 
 
 def index(request):
@@ -45,3 +46,69 @@ def about(request):
 def products_details(request, product_id):
     products = get_object_or_404(Product, id=product_id)
     return render(request, "product_details.html", context={"product": products})
+
+
+def cart_add(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    cart = request.session.get(settings.CART_SESSION_ID, {})
+
+    if not request.user.is_authenticated():
+        if cart.get(product_id):
+            cart[product_id] += 1
+        else:
+            cart[product_id] = 1
+        request.session[settings.CART_SESSION_ID] = cart
+    else:
+        cart = Cart.objects.get_or_create(user=request.user)
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+        if not created:
+            cart_item.amount += 1
+            cart_item.save()
+    return redirect("products:cart_detail")
+
+
+def cart_detail(request):
+    if not request.user.is_authenticated():
+        cart = request.session.get(settings.CART_SESSION_ID, {})
+        product_ids = cart.keys()
+        products = Product.objects.filter(id__in=product_ids)
+        cart_items = []
+        total_price = 0
+        for product in products:
+            count = cart[str(product.id)]
+            price = count * product.price
+            total_price += price
+            cart_items.append({"product": products, "count": count, "price": price})
+        else:
+            try:
+                cart = request.user.cart
+            except Cart.DoesNotExists:
+                cart = None
+
+            if not cart or not cart.items.count():
+                cart_items = []
+                total_price = 0
+            else:
+                cart_items = cart.items.select_related("product").all()
+                total_price = sum(item.product.price * item.amount for item in cart_items)
+
+        return render(request, "cart_detail.html", context={"cart_items": cart_items, "total_price": total_price})
+
+
+def delete_item_cart(request, item_id):
+    product = get_object_or_404(Product, id=item_id)
+
+    if not request.user.is_authenticated():
+        cart = request.session.get(settings.CART_SESSION_ID, {})
+        if item_id in cart:
+            del cart[item_id]
+            request.session[settings.CART_SESSION_ID] = cart
+        return redirect("products:cart_detail")
+    else:
+        try:
+            cart = request.user.cart
+            item_del = CartItem.objects.get(cart=cart, product=product)
+            item_del.delete()
+        except CartItem.DoesNotExist:
+            cart = None
+        return redirect("products:cart_detail")

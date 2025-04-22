@@ -118,6 +118,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 STATIC_URL = 'static/'
 MEDIA_URL = '../media/'
 MEDIA_ROOT = f"{BASE_DIR}/media"
@@ -130,5 +132,5 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # EMAIL_USE_TLS = True
 # DEFAULT_FROM_EMAIL = "My shop oleksandrborzovets9@gmail.com"
 
+CART_SESSION_ID = "cart"
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

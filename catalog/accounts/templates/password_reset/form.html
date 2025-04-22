@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Password Recovery</h2>
+<p>Please enter the email address you used during registration. We will send you a message with instructions to reset your password.</p>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit" class="btn btn-primary">
+</form>
+{% endblock %}

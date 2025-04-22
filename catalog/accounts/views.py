@@ -91,3 +91,4 @@ def confirm_email(request):
     user.email = new_email
     user.save()
     return render(request, "shop/confirm_email.html", {"new_email": new_email})
+

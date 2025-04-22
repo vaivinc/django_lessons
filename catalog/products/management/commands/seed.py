@@ -2,7 +2,7 @@ import random
 from faker import Faker
 from django.core.management.base import BaseCommand
 
-from products.models import Category, Product
+from catalog.products.models import Category, Product
 
 
 class Command(BaseCommand):
