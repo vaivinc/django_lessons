@@ -3,11 +3,12 @@ from django.contrib.auth.models import User
 from django import forms
 from captcha.fields import CaptchaField
 from django.core.exceptions import ValidationError
+from accounts.serializers.forms_serializer import CaptchaFieldSerializer
 
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
-    captcha = CaptchaField()
+    captcha = CaptchaFieldSerializer()
 
     class Meta:
         model = User
@@ -25,3 +26,19 @@ class ProfileUpdateForm(forms.Form):
             raise ValidationError("User with this Email Already Exists")
         else:
             return new_email
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+        if self.user:
+            self.fields["email"].initial = self.user.email
+
+
+class RegisterFormWithoutCaptcha(UserCreationForm):
+    class Meta:
+        model = User
+        fields = ("username", "email", "password1", "password2")
+
+class LoginForm(forms.Form):
+    username = forms.CharField(required=True, label="Login:")
+    password = forms.CharField(widget=forms.PasswordInput(), required=True, label="Password:")

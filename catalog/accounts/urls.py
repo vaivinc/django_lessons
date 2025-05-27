@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import register, profile, logout_view, login_view, edit_profile_view, confirm_email
+from accounts.views.views import register, profile, logout_view, login_view, edit_profile_view, confirm_email
 from django.contrib.auth import views as auth_views
 
 app_name = "shop"

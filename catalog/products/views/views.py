@@ -1,6 +1,15 @@
+from PIL.Image import item
+from django.core.checks import messages
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product, Category, Cart, CartItem
+
+from ..forms import OrderCreateForm
+from ..models import Product, Category, OrderItem, Payment, CartItem, Cart
 from django.conf import settings
+
+
+def calculate_discount(value, arg):
+    discount_value = value * arg / 100
+    return value - discount_value
 
 
 def index(request):
@@ -50,16 +59,15 @@ def products_details(request, product_id):
 
 def cart_add(request, product_id):
     product = get_object_or_404(Product, id=product_id)
-    cart = request.session.get(settings.CART_SESSION_ID, {})
-
     if not request.user.is_authenticated():
+        cart = request.session.get(settings.CART_SESSION_ID, {})
         if cart.get(product_id):
             cart[product_id] += 1
         else:
             cart[product_id] = 1
         request.session[settings.CART_SESSION_ID] = cart
     else:
-        cart = Cart.objects.get_or_create(user=request.user)
+        cart = request.user.cart
         cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
         if not created:
             cart_item.amount += 1
@@ -112,3 +120,53 @@ def delete_item_cart(request, item_id):
         except CartItem.DoesNotExist:
             cart = None
         return redirect("products:cart_detail")
+
+
+def checkout(request):
+    if (request.user.is_authenticated() and not getattr(request.user, "cart", None)) or (not request.user.
+        is_authenticated and not request.session.get(settings.CART_SESSION_ID)):
+        messages.error(request, "Cart is empty")
+        return redirect("products:cart_detail")
+
+    if request.method == "GET":
+        form = OrderCreateForm()
+        if request.user.is_authenticated():
+            form.initial["contact_email"] = request.user.email
+    elif request.method == "POST":
+        form = OrderCreateForm(request.POST)
+        if form.is_valid():
+            order = form.save(commit=False)
+            if request.user.is_authenticated:
+                order.user = request.user
+            order.save()
+
+            if request.user.is_authenticated:
+                cart = getattr(request.user, "cart")
+                cart_items = cart.items.select_related("product").all()
+            else:
+                cart = request.session.get(settings.CART_SESSION_ID)
+                cart_items = []
+                for product_id, amount in cart.items():
+                    product = Product.objects.get(id=product_id)
+            cart_items.append({"product": product, "amount": amount})
+
+            items = OrderItem.objects.bulk_create(
+                [OrderItem(order=order,
+                           product=item.product,
+                           amount=item.amount,
+                           price=calculate_discount(item.product.price, item.product)
+                           )
+                 for item in cart_items
+                 ]
+             )
+
+            total_price = sum(item.product.price * item.amount for item in items)
+            method = form.cleaned_data.get("payment_method")
+            if method != "cash":
+                Payment.objects.create(order=order, provider=method, amount=total_price)
+            else:
+                order.status = 2
+
+            order.save()
+
+    return render(request, "checkout.html", context={"form": form})
