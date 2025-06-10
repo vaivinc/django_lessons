@@ -34,6 +34,8 @@ class Product(models.Model):
     def discount_price(self):
         if self.discount:
             return round(self.price - (self.price * self.discount / 100), 2)
+        else:
+            return self.price
 
     class Meta:
         ordering = ['-created_at']
@@ -48,6 +50,10 @@ class Cart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="cart")
     created_at = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def total(self):
+        return sum([item.item_total for item in self.items.all()])
+
     def __str__(self):
         return f"{self.user.name}\"s cart"
 
@@ -59,7 +65,11 @@ class CartItem(models.Model):
 
     @property
     def item_total(self):
-        return self.product.price * self.amount if not self.product.discount else self.product.price * self.amount
+        return (
+            self.product.price * self.amount
+            if not self.product.discount
+            else self.product.discount_price * self.amount
+        )
 
 
     class Meta:
