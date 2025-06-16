@@ -6,6 +6,8 @@ from ..forms import OrderCreateForm
 from ..models import Product, Category, OrderItem, Payment, CartItem, Cart
 from django.conf import settings
 
+from utils.email import send_order_confirmation_email
+
 
 def calculate_discount(value, arg):
     discount_value = value * arg / 100
@@ -84,22 +86,27 @@ def cart_detail(request):
         total_price = 0
         for product in products:
             count = cart[str(product.id)]
+            if count == 0:
+                if product.discount:
+                    raw_price = calculate_discount(product.price, product.discount)
+                else:
+                    raw_price = product.price
             price = count * product.price
             total_price += price
             cart_items.append({"product": products, "count": count, "price": price})
+
+    else:
+        try:
+            cart = request.user.cart
+        except Cart.DoesNotExists:
+            cart = None
+
+        if not cart or not cart.items.count():
+            cart_items = []
+            total_price = 0
         else:
-            try:
-                cart = request.user.cart
-            except Cart.DoesNotExists:
-                cart = None
-
-            if not cart or not cart.items.count():
-                cart_items = []
-                total_price = 0
-            else:
-                cart_items = cart.items.select_related("product").all()
-                total_price = sum(item.product.price * item.amount for item in cart_items)
-
+            cart_items = cart.items.select_related("product").all()
+            total_price = sum(item.product.price * item.amount for item in cart_items)
         return render(request, "cart_detail.html", context={"cart_items": cart_items, "total_price": total_price})
 
 
@@ -109,9 +116,8 @@ def delete_item_cart(request, item_id):
     if not request.user.is_authenticated():
         cart = request.session.get(settings.CART_SESSION_ID, {})
         if item_id in cart:
-            del cart[item_id]
+            cart[item_id] -= 1
             request.session[settings.CART_SESSION_ID] = cart
-        return redirect("products:cart_detail")
     else:
         try:
             cart = request.user.cart
@@ -119,12 +125,13 @@ def delete_item_cart(request, item_id):
             item_del.delete()
         except CartItem.DoesNotExist:
             cart = None
-        return redirect("products:cart_detail")
+    return redirect("products:cart_detail")
 
 
 def checkout(request):
-    if (request.user.is_authenticated() and not getattr(request.user, "cart", None)) or (not request.user.
-        is_authenticated and not request.session.get(settings.CART_SESSION_ID)):
+    if (request.user.is_authenticated() and not getattr(request.user, "cart", None)) or (
+            not request.user.is_authenticated and not request.session.get(settings.CART_SESSION_ID)
+    ):
         messages.error(request, "Cart is empty")
         return redirect("products:cart_detail")
 
@@ -168,5 +175,13 @@ def checkout(request):
                 order.status = 2
 
             order.save()
+
+            if request.user.is_authenticated:
+                cart.items.all().delete()
+            else:
+                request.session[settings.CART_SESSION_ID] = {}
+            send_order_confirmation_email(order=order)
+            messages.success(request, 'Text')
+            return redirect('products:index')
 
     return render(request, "checkout.html", context={"form": form})

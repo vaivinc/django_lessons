@@ -2,9 +2,9 @@ from rest_framework.viewsets import ModelViewSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.permissions import IsAdminUser, AllowAny
-from ..models import Category, Product
-from ..serializers.product_serializer import ProductSerializer
-from ..filters import ProductFilter
+from products.models import Category, Product
+from products.serializers.product_serializer import ProductSerializer
+from products.filters import ProductFilter
 
 
 class ProductViewSet(ModelViewSet):

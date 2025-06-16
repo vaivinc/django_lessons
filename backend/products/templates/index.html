@@ -4,19 +4,22 @@
 
 <div class='container'>
     <h1>Каталог Товарів</h1>
-        <div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="row row-cols-1 row-cols-md-3 g-4">
 
             {% for product in products %}
                 <div class="col">
                     <div class="card h-100 shadow-sm">
                         <img src="{{product.image_path|default:'https://assets.turbologo.com/blog/en/2021/09/10094210/product-photo-1.png'}}"
-                             alt="{{product.name}} " class="card-img-top">
+                             alt="{{product.name}}"
+                             class="card-img-top">
 
                     <div class="card-body">
-                        <h5 class="card-title">{{product.name}</h5>
                         {% if not product.available %}
                             <span class="text-secondary">Not available</span>
+                        {% else %}
+                            <h5 class="card-title">{{product.name}</h5>
                         {% endif %}
+                    </div>
 
                     <div class="product-rating">
                         {% for i in "12345" %}
@@ -45,11 +48,11 @@
                     {% if not product.available %}
                        <span class="text-muted">Not available</span>
                     {% endif %}
-                    <a href="{% url 'product_details' product.id %}" class="btn-primary">Details</a>
-                    <a href="{% url 'cart_add' product.id %}" class="btn-primary">Add to your cart</a>
+
+                    <a href="{% url 'products:product_details' product.id %}" class="btn-primary">Details</a>
+                    <a href="{% url 'products:cart_add' product.id %}" class="btn-primary">Add to your cart</a>
                 </div>
             </div>
         </div>
     {% endfor %}
-    </div>
 {% endblock %}

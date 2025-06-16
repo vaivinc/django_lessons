@@ -40,17 +40,25 @@ class AccountViewSet(ViewSet):
     @action(detail=False, methods=["post"])
     def login_view(self, request):
         form = LoginForm(request.data)
+
         if form.is_valid():
-            user = authenticate(request, username=form.cleaned_data["username"], password=form.changed_data["password"])
+            user = authenticate(request,
+                                username=form.cleaned_data["username"],
+                                password=form.changed_data["password"]
+                                )
+
             if user:
                 session_cart = request.session.get(settings.CART_SESSION_ID, default={})
                 if session_cart:
+
                     cart = request.user.cart
                     for p_id, a in session_cart.items():
                         product = Product.objects.get(id=p_id)
-                        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+                        cart_item, created = CartItem.objects.get_or_create(cart=cart,
+                                                                            product=product)
                         cart_item.amount = cart_item.amount + a if not created else a
                         cart_item.save()
+
                     session_cart.clear()
                 return Response({"message": "Successful login"}, status=200)
 
@@ -78,8 +86,10 @@ class AccountViewSet(ViewSet):
                 send_mail_confirm(request, new_email, request.user)
 
             avatar = form.cleaned_data.get("avatar")
+
             if avatar:
                 profile.avatar = avatar
+
             profile.save()
             return Response({"results": ProfileSerializer(profile).data}, status=200)
 
@@ -99,7 +109,6 @@ class AccountViewSet(ViewSet):
 
         except User.DoesNotExists:
             return Response({"error": "User not found"}, status=404)
-
         if user.is_active and User.objects.filter(email=new_email).exists():
             return Response({"error": "This email is already used"}, status=400)
 

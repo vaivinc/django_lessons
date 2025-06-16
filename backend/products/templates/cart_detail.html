@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+
 {% block content %}
     <div class="container mt-4">
         <h2>Your cart</h2>
@@ -19,7 +20,8 @@
                         <td>{{item.product.name}}</td>
                         <td>{{item.amount}}</td>
                         <td>{{item.price}}</td>
-                        <td><a href="#" class="btn btn-sm btn-outline-danger" title="Remove item">x</a></td>
+                        <td><a href="{% url 'products:cart_delete' item.product.id %}" class="btn btn-sm btn-outline-danger" title="Remove">-</a></td>
+                        <td><a href="{% url 'products:cart_add' item.product.id %}" class="btn btn-sm btn-outline-success" title="Add">+</a></td>
                     </tr>
                 {% endfor %}
                 <tr class="table-secondary">
@@ -36,5 +38,4 @@
             </div>
         {% endif %}
     </div>
-
 {% endblock %}

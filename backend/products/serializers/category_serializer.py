@@ -7,11 +7,3 @@ class CategorySerializers(serializers.ModelSerializer):
         model = Category
         fields = "__all__"
 
-
-class UserSerializers(serializers.ModelSerializer):
-    user = CategorySerializers(read_only=True)
-
-    class Meta:
-        model = Category
-        fields = "__all__"
-

@@ -1,5 +1,6 @@
-{% extends base.html %}
+{% extends 'base.html' %}
+
 {% block content %}
-    <h2 class="text-success">Password change successfully</h2>
-    <a href="{% url 'accounts:login' %}">Go to login</a>
+    <h2 class="text-success">Password Changed Successfully!</h2>
+    <a href="{% url 'accounts:login' %}">Go To Login</a>
 {% endblock %}

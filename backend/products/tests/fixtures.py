@@ -7,13 +7,14 @@ from products.models import Product, Category, Order, OrderItem
 def product():
     category = Category.objects.create(name="test_category")
 
-    return Product.objects.create(
+    product_ = Product.objects.create(
         name="test_product",
         category=category,
         nomenclature="test_nomenclature",
         price=100
     )
 
+    return product_
 
 @pytest.fixture
 def category_fixture():
@@ -34,11 +35,27 @@ def product_discount():
 
 
 @pytest.fixture
-def order():
-    return Order.objects.create(
+def order(user, product):
+    order_ = Order.objects.create(
+        user=user,
         contact_name="test_contact_name",
         contact_email="test_contact_email",
         contact_phone="test_contact_phone",
         address="test_address"
     )
+
+    OrderItem.objects.create(
+        order=order_,
+        product=product,
+        price=100
+    )
+
+    OrderItem.objects.create(
+        order=order_,
+        product=product,
+        amount=2,
+        price=80
+    )
+
+    return order_
 

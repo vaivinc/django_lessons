@@ -7,10 +7,11 @@ from .views.category import CategoryViewSet
 from .views.product import ProductViewSet
 from .views.cart import CartViewSet
 
-from .views.views import index, about, products_details, cart_add, delete_item_cart, checkout
+from .views.views import index, about, products_details, cart_add, delete_item_cart, checkout, cart_detail
 from accounts.views.accounts import AccountViewSet
 
 app_name = "products"
+
 router = DefaultRouter()
 
 router.register(r"products", viewset=ProductViewSet)
@@ -25,7 +26,8 @@ urlpatterns = [
     path("cart_add/<int:product_id>/", cart_add, name="cart_add"),
     path("products_details/", products_details, name="products_details"),
     path("delete_item_cart/", delete_item_cart, name="delete_item_cart"),
-    path("checkout/", checkout, name="checkout")
+    path("checkout/", checkout, name="checkout"),
+    path("cart_detail/", cart_detail, name="cart_detail")
 ]
 
 urlpatterns += router.urls

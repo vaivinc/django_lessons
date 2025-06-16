@@ -16,7 +16,9 @@ class CartViewSet(ViewSet):
         product = get_object_or_404(Product, id=product_id)
         if request.user.is_authenticated:
             cart = request.user.cart
-            cart_item, created = CartItem.objects.get_or_create(product=product, cart=cart)
+            cart_item, created = CartItem.objects.get_or_create(
+                product=product, cart=cart
+            )
             if created:
                 cart_item.amount = 1
             else:
@@ -31,18 +33,15 @@ class CartViewSet(ViewSet):
     def items(self, request):
         if request.user.is_authenticated:
             cart = request.user.cart
-            cart.items.select_related("product").all()
-            data = request.user.cart
             return Response(CartItemSerializer(cart).data)
         else:
             cart = request.session.get(settings.CART_SESSION_ID, default={})
             products = Product.objects.filter(id__in=cart.keys())
-
             items = []
             total = 0
             for product in products:
-                data = ProductSerializer(product). data
-                amount = cart.get(product.id)
+                data = ProductSerializer(product).data
+                amount = cart.get(str(product.id))
                 item_total = (product.discount_price or product.price) * amount
                 items.append({
                     "product": product,
@@ -51,7 +50,12 @@ class CartViewSet(ViewSet):
                     "cart": None
                 })
                 total += item_total
-            return Response({"user": request.user, "created_at": None})
+
+            return Response({
+                 "user": request.user,
+                 "created_at": None,
+                 "items": items,
+                 "total": total})
 
     @action(detail=False, methods=["post"], url_path="cart-checkout")
     def checkout(self, request):
@@ -65,8 +69,10 @@ class CartViewSet(ViewSet):
                 return Response({"error": "Cart is empty"}, status=400)
 
         form = OrderCreateForm(request.data)
+
         if not form.is_valid():
             return Response({"errors": form.errors}, status=400)
+
         order = form.save(commit=False)
 
         if request.user.is_authenticated:
@@ -76,26 +82,30 @@ class CartViewSet(ViewSet):
 
         if request.user.is_authenticated:
             cart_items = order.user.cart.items.select_related("product").all()
-            items = OrderItem.objects.bulk_create([OrderItem(order=order,
-                                                             product=item.product,
-                                                             amount=item.amount,
-                                                             price=item.discount_price or item.price)
-                                                             for item in cart_items]
-                                                             )
+            items = OrderItem.objects.bulk_create([
+                OrderItem(
+                    order=order,
+                    product=item.product,
+                    amount=item.amount,
+                    price=item.discount_price or item.price)
+                for item in cart_items])
 
         else:
             cart_items = order.user.cart.items.select_related("product").all()
-            items = OrderItem.objects.bulk_create([OrderItem(order=order,
-                                                             product=item["product"],
-                                                             amount=item.amount["amount"],
-                                                             price=item["product"] or item["product"])
-                                                             for item in cart_items]
-                                                             )
+            items = OrderItem.objects.bulk_create([
+                OrderItem(
+                    order=order,
+                    product=item["product"],
+                    amount=item.amount["amount"],
+                    price=item["product"] or item["product"])
+                for item in cart_items])
 
         method = form.cleaned_data["payment_method"]
         total = sum(item.item_total for item in items)
+
         if method != "cash":
             Payment.objects.create(order=order, provider=method, amount=total)
+
         else:
             order.status = Order.Status.PROCESSING
             order.save()

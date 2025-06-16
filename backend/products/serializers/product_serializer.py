@@ -27,32 +27,37 @@ class ProductSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(OpenApiTypes.FLOAT)
     def get_discount_price(self, obj):
-        return obj.discount_price
+        return getattr(obj, "discount_price", None)
 
     def validate_price(self, value):
         if value <= 0:
             raise serializers.ValidationError("The price should be higher than 0")
-        return value
+        else:
+            return value
 
     def validate_stock(self, value):
         if value < 0:
             raise serializers.ValidationError("The stock should be higher than 0")
-        return value
+        else:
+            return value
 
     def validate_description(self, value):
         if isinstance(value, str):
             return value
-        raise serializers.ValidationError("Description must be text")
+        else:
+            raise serializers.ValidationError("Description must be text")
 
     def validate_category(self, value):
         if not (isinstance(value, int)) or not (isinstance(value, Category)):
             raise serializers.ValidationError("Category must be int or Category instance")
-        return value
+        else:
+            return value
 
     def validate_discount(self, value):
         if value < 0:
             raise serializers.ValidationError("The discount should be higher than 0")
-        return value
+        else:
+            return value
 
     def validate_attributes(self, value):
         if not value:

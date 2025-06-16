@@ -2,7 +2,7 @@ import random
 from faker import Faker
 from django.core.management.base import BaseCommand
 
-from ...models import Category, Product
+from products.models import Category, Product
 
 
 class Command(BaseCommand):
@@ -11,7 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         fake = Faker()
 
-        categories = ["Food", "Technology", "Clothes", "Home"]
+        categories = ["Food", "Technology", "Clothes", "Home",]
 
         categories_objects = [Category.objects.get_or_create(name=c)[0] for c in categories]
 
@@ -25,8 +25,9 @@ class Command(BaseCommand):
                                    price=random.randint(1, 100),
                                    discount=random.randint(0, 51),
                                    stock=random.randint(1, 1000),
-                                   available=random.choice(["True", "False"]),
-                                   rating=random.uniform(0.1, 5.0),
+                                   available=random.choice([True, False]),
+                                   rating=round(random.uniform(0.1, 5.0), 1),
                                    attributes={"colour": fake.color_name()})
 
-        self.stdout.write(self.style.SUCCESS("Successfully added 50 products"))
+        self.stdout.write(self.style.SUCCESS("Successfully added 50 products!"))
+

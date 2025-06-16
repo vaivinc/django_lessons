@@ -41,4 +41,6 @@ class RegisterFormWithoutCaptcha(UserCreationForm):
 
 class LoginForm(forms.Form):
     username = forms.CharField(required=True, label="Login:")
-    password = forms.CharField(widget=forms.PasswordInput(), required=True, label="Password:")
+    password = forms.CharField(
+        widget=forms.PasswordInput(), required=True, label="Password:"
+    )

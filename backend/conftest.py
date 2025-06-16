@@ -3,7 +3,7 @@ import django
 import pytest
 from django.contrib.auth.models import User
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "catalog.settings")
 django.setup()
 
 

@@ -15,6 +15,12 @@ class CartItemSerializer(serializers.ModelSerializer):
         def get_item_total(self, obj):
             return obj.item_total
 
+        def validate_amount(self, value):
+            if value <= 0:
+                raise serializers.ValidationError("The price should be higher than 0")
+            else:
+                return value
+
 
 class CartSerializer(serializers.ModelSerializer):
     items = CartItemSerializer(source="items", many=True)

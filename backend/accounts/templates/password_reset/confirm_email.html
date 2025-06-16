@@ -1,10 +1,6 @@
 {% extends 'base.html' %}
+
 {% block content %}
-
-<div class="alert alert-success">
-    Пошту успішно підтверджен!
-    {{email}}
-  </div>
-  <a href="{% url accounts:index' %}">Повернутись у профіль</a>
-
+  <h2>Your email <span>{{ email }}</span> has been confirmed</h2>
+  <a href="{% url products:index' %}" type="button">Повернутись у профіль</a>
 {% endblock %}

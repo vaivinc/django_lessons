@@ -59,12 +59,12 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return redirect("shop:index")
+    return redirect("products:index")
 
 
 @login_required
 def profile(request):
-    profile, created = Profile.objects.get_or_create(user=request.user)
+    profile = request.user.profile
     return render(request, "profile.html", {"profile": profile})
 
 
@@ -82,6 +82,7 @@ def edit_profile_view(request):
                 if avatar:
                     profile.avatar = avatar
                 profile.save()
+                return redirect("accounts:profile")
     else:
         form = ProfileUpdateForm(user=user)
     return render(request, "edit_profile.html", context={"form": form, "user": user, "profile": profile})
