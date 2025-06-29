@@ -1,6 +1,6 @@
 import pytest
 
-from products.models import Product, Category, Order, OrderItem
+from products.models import Product, Category, Order, OrderItem, Cart, CartItem
 
 
 @pytest.fixture
@@ -15,6 +15,7 @@ def product():
     )
 
     return product_
+
 
 @pytest.fixture
 def category_fixture():
@@ -59,3 +60,22 @@ def order(user, product):
 
     return order_
 
+
+@pytest.fixture
+def cart(user, product):
+    cart_ = Cart.objects.create(
+        user=user,
+    )
+
+    CartItem.objects.creaate(
+        cart=cart_,
+        product=product
+    )
+
+    CartItem.objects.creaate(
+        cart=cart_,
+        product=product,
+        amount=2
+    )
+
+    return cart_

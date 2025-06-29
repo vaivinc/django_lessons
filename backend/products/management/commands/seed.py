@@ -11,7 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         fake = Faker()
 
-        categories = ["Food", "Technology", "Clothes", "Home",]
+        categories = ["Food", "Technology", "Clothes", "Home"]
 
         categories_objects = [Category.objects.get_or_create(name=c)[0] for c in categories]
 
