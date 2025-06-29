@@ -13,7 +13,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.11]
+        python-version: [3.11] 
 
     steps:
     - uses: actions/checkout@v4
@@ -28,3 +28,8 @@ jobs:
     - name: Run Tests
       run: |
         pytest -s
+    - name: Build Token Image
+      run: |
+        docker build -t catalog . 
+        docker run -p 8000:8000 -d --name catalog catalog
+
